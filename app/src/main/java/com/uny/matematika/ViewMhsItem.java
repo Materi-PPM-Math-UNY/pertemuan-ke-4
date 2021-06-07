@@ -10,10 +10,7 @@ import android.graphics.Color;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.RelativeLayout;
-import android.widget.TextView;
+import android.widget.*;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import com.bumptech.glide.Glide;
@@ -32,14 +29,12 @@ public class ViewMhsItem extends RelativeLayout {
     Button btnDel;
 
     MhsParcel parcel;
-    OnDeleted onDeleted;
+    OnItemsAction onItemsAction;
+    ViewMhsItem viewMhsItem;
 
-    public void setOnDeleted(OnDeleted onDeleted) {
-        this.onDeleted = onDeleted;
-    }
-
-    public ViewMhsItem(Context context) {
+    public ViewMhsItem(Context context, OnItemsAction onItemsAction) {
         super(context);
+        this.onItemsAction = onItemsAction;
         inflate(context);
     }
 
@@ -67,6 +62,7 @@ public class ViewMhsItem extends RelativeLayout {
 
     void inflate(Context context) {
         this.context = context;
+        this.viewMhsItem = this;
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         layoutInflater.inflate(R.layout.layout_mhs_item, this);
         txtNama = findViewById(R.id.txtNama);
@@ -76,10 +72,13 @@ public class ViewMhsItem extends RelativeLayout {
         btnDel = findViewById(R.id.btnDel);
         imgPhoto = findViewById(R.id.imgPhoto);
 
+
         btnEdit.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
+                int index = ((LinearLayout)getParent()).indexOfChild(viewMhsItem);
                 Intent intent = new Intent(context, EditActivity.class);
+                intent.putExtra("index", index);
                 intent.putExtra("mhs", parcel);
                 intent.putExtra("isNew", false);
                 ((Activity) context).startActivityForResult(intent, 112);
@@ -100,7 +99,8 @@ public class ViewMhsItem extends RelativeLayout {
                             public void onClick(DialogInterface dialog, int which) {
                                 // Continue with delete operation
                                 mhsDatabase.getMhsDao().delete(parcel.getId());
-                                onDeleted.onSucceded(true);
+                                onItemsAction.onItemDeleted(viewMhsItem);
+                                //onDeleted.onSucceded(true);
                             }
                         })
 
@@ -115,7 +115,7 @@ public class ViewMhsItem extends RelativeLayout {
     }
 
     public void startAnim(){
-        int highlightColor = ContextCompat.getColor(getContext(), R.color.teal_200);
+        int highlightColor = ContextCompat.getColor(getContext(), R.color.purple_200);
 
         ObjectAnimator highlightNewInsert = ObjectAnimator
                 .ofInt(this, "backgroundColor", highlightColor, Color.WHITE)
@@ -124,7 +124,7 @@ public class ViewMhsItem extends RelativeLayout {
         highlightNewInsert.start();
     }
 
-    public interface OnDeleted{
-        void onSucceded(boolean isDeleted);
+    public interface OnItemsAction{
+        void onItemDeleted(ViewMhsItem viewMhsItem);
     }
 }

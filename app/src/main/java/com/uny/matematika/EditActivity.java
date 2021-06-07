@@ -26,13 +26,14 @@ public class EditActivity extends AppCompatActivity {
 
     MhsParcel mhsParcel;
     boolean isNew;
+    int index = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit);
         mhsParcel = getIntent().getParcelableExtra("mhs");
-
+        index = getIntent().getIntExtra("index", 0);
         isNew = (mhsParcel == null);
 
         initViews();
@@ -60,6 +61,7 @@ public class EditActivity extends AppCompatActivity {
                 doSave();
 
                 Intent intent = getIntent();
+                intent.putExtra("index", index);
                 intent.putExtra("mhs", mhsParcel);
                 intent.putExtra("isNew", isNew);
                 setResult(RESULT_OK, intent);
